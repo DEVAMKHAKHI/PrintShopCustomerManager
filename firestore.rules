@@ -1,0 +1,57 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ==========================================
+    // PrintShop Customer Manager Security Rules
+    // ==========================================
+
+    // Helper functions for validation
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function hasValidCustomerFields() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['fullName', 'phoneNumber', 'dateOfBirth', 'email', 'address', 'createdAt'])
+        && data.fullName is string && data.fullName.size() >= 2
+        && data.phoneNumber is string && data.phoneNumber.size() >= 7
+        && data.email is string && data.email.matches('^.+@.+\\..+$')
+        && data.address is string && data.address.size() >= 5
+        && data.createdAt is int;
+    }
+
+    // Rules for Customers Collection
+    match /customers/{customerId} {
+      // 1. Read: Only authenticated print shop staff can read customer directory
+      allow read: if isAuthenticated();
+
+      // 2. Create: Authenticated staff can insert customers with validated fields
+      allow create: if isAuthenticated() && hasValidCustomerFields();
+
+      // 3. Update: Authenticated staff can modify customer information
+      allow update: if isAuthenticated()
+        && request.resource.data.fullName is string
+        && request.resource.data.fullName.size() >= 2
+        && request.resource.data.phoneNumber is string
+        && request.resource.data.email is string;
+
+      // 4. Delete: Authenticated staff can remove records
+      allow delete: if isAuthenticated();
+    }
+
+    // Rules for Users Collection
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // Block all other unspecified collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

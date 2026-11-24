@@ -1,0 +1,34 @@
+{
+  "project_info": {
+    "project_number": "104857291038",
+    "project_id": "printshop-customer-manager",
+    "storage_bucket": "printshop-customer-manager.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:104857291038:android:87c12f459ba09d44e54a32",
+        "android_client_info": {
+          "package_name": "com.example.printshopmanager"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "104857291038-abc123def456ghi789jkl012mno345pq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDummyKeyForPrintShopManagerApp_ABC123"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

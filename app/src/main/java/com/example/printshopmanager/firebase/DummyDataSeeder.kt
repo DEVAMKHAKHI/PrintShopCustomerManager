@@ -1,0 +1,127 @@
+package com.example.printshopmanager.firebase
+
+import com.example.printshopmanager.model.Customer
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
+
+/**
+ * Seeder for realistic dummy printing shop customer data.
+ * Uses deterministic document IDs (seed_cust_001 .. seed_cust_010)
+ * to prevent duplicates upon multiple invocations.
+ */
+object DummyDataSeeder {
+
+    val sampleCustomers: List<Customer> = listOf(
+        Customer(
+            customerId = "seed_cust_001",
+            fullName = "Apex Graphic Design Studio",
+            phoneNumber = "555-0101",
+            dateOfBirth = "1992-04-15",
+            email = "info@apexdesigns.example",
+            address = "101 Creative Blvd, Suite 400, Chicago, IL 60601",
+            createdAt = System.currentTimeMillis() - 86400000L * 30
+        ),
+        Customer(
+            customerId = "seed_cust_002",
+            fullName = "Metro University Publishing",
+            phoneNumber = "555-0102",
+            dateOfBirth = "1985-09-22",
+            email = "press@metrouniv.example",
+            address = "450 Academic Way, Hall 2B, Chicago, IL 60637",
+            createdAt = System.currentTimeMillis() - 86400000L * 25
+        ),
+        Customer(
+            customerId = "seed_cust_003",
+            fullName = "Sweet Bites Artisan Bakery",
+            phoneNumber = "555-0103",
+            dateOfBirth = "1990-11-08",
+            email = "orders@sweetbites.example",
+            address = "24 Baker Street, Chicago, IL 60614",
+            createdAt = System.currentTimeMillis() - 86400000L * 20
+        ),
+        Customer(
+            customerId = "seed_cust_004",
+            fullName = "Blue Horizon Architectural Group",
+            phoneNumber = "555-0104",
+            dateOfBirth = "1983-02-17",
+            email = "plans@bluehorizon.example",
+            address = "880 Skyline Tower, Floor 12, Chicago, IL 60606",
+            createdAt = System.currentTimeMillis() - 86400000L * 18
+        ),
+        Customer(
+            customerId = "seed_cust_005",
+            fullName = "Horizon Legal & Corporate Services",
+            phoneNumber = "555-0105",
+            dateOfBirth = "1978-06-30",
+            email = "documents@horizonlegal.example",
+            address = "300 Financial Center, Suite 500, Chicago, IL 60602",
+            createdAt = System.currentTimeMillis() - 86400000L * 15
+        ),
+        Customer(
+            customerId = "seed_cust_006",
+            fullName = "Grand Oak Event Planners",
+            phoneNumber = "555-0106",
+            dateOfBirth = "1988-12-05",
+            email = "gala@grandoak.example",
+            address = "72 Celebration Ave, Chicago, IL 60611",
+            createdAt = System.currentTimeMillis() - 86400000L * 12
+        ),
+        Customer(
+            customerId = "seed_cust_007",
+            fullName = "Pulse Fitness & Wellness Club",
+            phoneNumber = "555-0107",
+            dateOfBirth = "1995-07-19",
+            email = "marketing@pulsefit.example",
+            address = "512 Wellness Way, Chicago, IL 60622",
+            createdAt = System.currentTimeMillis() - 86400000L * 9
+        ),
+        Customer(
+            customerId = "seed_cust_008",
+            fullName = "Stellar Tech Solutions",
+            phoneNumber = "555-0108",
+            dateOfBirth = "1993-03-28",
+            email = "operations@stellartech.example",
+            address = "900 Innovation Parkway, Chicago, IL 60654",
+            createdAt = System.currentTimeMillis() - 86400000L * 6
+        ),
+        Customer(
+            customerId = "seed_cust_009",
+            fullName = "Willow Creek Real Estate Co.",
+            phoneNumber = "555-0109",
+            dateOfBirth = "1982-10-14",
+            email = "listings@willowcreekrealty.example",
+            address = "154 Meadow Lane, Chicago, IL 60618",
+            createdAt = System.currentTimeMillis() - 86400000L * 3
+        ),
+        Customer(
+            customerId = "seed_cust_010",
+            fullName = "Crimson Crest Restaurant & Cafe",
+            phoneNumber = "555-0110",
+            dateOfBirth = "1991-08-03",
+            email = "contact@crimsoncrest.example",
+            address = "78 Culinary Row, Chicago, IL 60607",
+            createdAt = System.currentTimeMillis() - 86400000L * 1
+        )
+    )
+
+    /**
+     * Seeds sample customers to Cloud Firestore batch-wise.
+     * Guaranteed no duplicates due to fixed document IDs.
+     */
+    suspend fun seedDatabase(firestore: FirebaseFirestore = FirebaseManager.firestore): Result<Int> {
+        return try {
+            val batch = firestore.batch()
+            val collection = firestore.collection(FirebaseManager.COLLECTION_CUSTOMERS)
+
+            sampleCustomers.forEach { customer ->
+                val docRef = collection.document(customer.customerId)
+                batch.set(docRef, customer.toMap())
+            }
+
+            batch.commit().await()
+            Result.success(sampleCustomers.size)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+}
